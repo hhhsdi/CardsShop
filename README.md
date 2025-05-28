@@ -1,66 +1,45 @@
-## Структура базы данных магазина видеокарт
+---
 
-### Таблицы
+## Ключевые изменения в архитектуре приложения
 
-*   **Manufacturers:**
-    *   `ManufacturerID` INTEGER PRIMARY KEY AUTOINCREMENT
-    *   `Name` TEXT NOT NULL
-    *   `Country` TEXT
+Мы внесли ряд существенных изменений для улучшения структуры, читаемости и тестируемости нашего приложения.
 
-*   **GPUs:**
-    *   `GPUID` INTEGER PRIMARY KEY AUTOINCREMENT
-    *   `ManufacturerID` INTEGER NOT NULL, FOREIGN KEY (ManufacturerID) REFERENCES Manufacturers(ManufacturerID)
-    *   `Model` TEXT NOT NULL
-    *   `MemoryGB` INTEGER NOT NULL
-    *   `Architecture` TEXT
+### 1. Четкое разделение слоев
 
-*   **VideoCards:**
-    *   `VideoCardID` INTEGER PRIMARY KEY AUTOINCREMENT
-    *   `GPUID` INTEGER NOT NULL, FOREIGN KEY (GPUID) REFERENCES GPUs(GPUID)
-    *   `ModelName` TEXT NOT NULL
-    *   `ManufacturerID` INTEGER NOT NULL, FOREIGN KEY (ManufacturerID) REFERENCES Manufacturers(ManufacturerID)
-    *   `Price` REAL NOT NULL
-    *   `ClockSpeedMHz` INTEGER
-    *   `BoostClockSpeedMHz` INTEGER
+Мы реализовали строгое разделение ответственности между слоями:
 
-*   **Shops:**
-    *   `ShopID` INTEGER PRIMARY KEY AUTOINCREMENT
-    *   `Name` TEXT NOT NULL
-    *   `Address` TEXT
+* **Бизнес-логика** сосредоточена в слое `Services`.
+* **Доступ к данным** осуществляется через слой `Repositories`.
+* **Интерфейсы** для определения контрактов расположены в слое `Interfaces`.
+* **Представление** и взаимодействие с пользователем находятся в слое `UI`.
 
-*   **Stocks:**
-    *   `StockID` INTEGER PRIMARY KEY AUTOINCREMENT
-    *   `ShopID` INTEGER NOT NULL, FOREIGN KEY (ShopID) REFERENCES Shops(ShopID)
-    *   `VideoCardID` INTEGER NOT NULL, FOREIGN KEY (VideoCardID) REFERENCES VideoCards(VideoCardID)
-    *   `Quantity` INTEGER NOT NULL
+### 2. Внедрение зависимостей
 
-*   **Customers:**
-    *   `CustomerID` INTEGER PRIMARY KEY AUTOINCREMENT
-    *   `FirstName` TEXT NOT NULL
-    *   `LastName` TEXT NOT NULL
-    *   `Email` TEXT UNIQUE
-    *   `PhoneNumber` TEXT
+Для повышения гибкости и упрощения тестирования мы внедрили механизм **внедрения зависимостей**:
 
-*   **Orders:**
-    *   `OrderID` INTEGER PRIMARY KEY AUTOINCREMENT
-    *   `CustomerID` INTEGER NOT NULL, FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
-    *   `OrderDate` DATETIME DEFAULT CURRENT_TIMESTAMP
-    *   `TotalAmount` REAL
+* **Сервисы** получают необходимые **репозитории** через свой конструктор.
+* **ConsoleUI** получает экземпляры **сервисов** также через свой конструктор.
 
-*   **OrderItems:**
-    *   `OrderItemID` INTEGER PRIMARY KEY AUTOINCREMENT
-    *   `OrderID` INTEGER NOT NULL, FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
-    *   `VideoCardID` INTEGER NOT NULL, FOREIGN KEY (VideoCardID) REFERENCES VideoCards(VideoCardID)
-    *   `Quantity` INTEGER NOT NULL
-    *   `Price` REAL NOT NULL
+### 3. Интерфейсы репозиториев
 
-### Связи
+Использование **интерфейсов репозиториев** предоставляет следующие преимущества:
 
-*   **Один ко многим:**
-    *   `Manufacturers` -> `GPUs`
-    *   `Manufacturers` -> `VideoCards`
-    *   `Shops` -> `Stocks`
-    *   `Customers` -> `Orders`
-    *   `GPUs` -> `VideoCards`
-*   **Многие ко многим:**
-    *   `Orders` <-> `VideoCards` (через `OrderItems`)
+* **Легкая смена реализаций**: Мы можем без труда менять конкретные реализации репозиториев (например, с одной базы данных на другую) без изменения бизнес-логики.
+* **Упрощение тестирования**: Интерфейсы позволяют легко создавать "заглушки" (mocks) для тестирования сервисов в изоляции.
+
+### 4. Валидация в бизнес-слое
+
+Теперь **валидация входных данных** и **проверка бизнес-правил** происходят непосредственно в **бизнес-слое** (`Services`):
+
+* Осуществляется **проверка входных данных** на корректность.
+* Выполняется **проверка существования связанных сущностей**.
+* Это обеспечивает **единое место для бизнес-правил**, гарантируя их консистентность и легкость поддержки.
+
+### 5. Обработка ошибок
+
+Мы стандартизировали подход к **обработке ошибок**:
+
+* Используются **консистентные исключения** для различных типов ошибок.
+* Реализована **централизованная обработка исключений** в `Program.cs`, что позволяет эффективно управлять ошибками на уровне всего приложения.
+
+---
