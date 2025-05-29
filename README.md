@@ -246,11 +246,7 @@ sequenceDiagram
 
     -   ManufacturerRepository
 
-4.  **Модели данных**:
 
-    -   VideoCard
-
-    -   Manufacturer
 
 # База данных
 
