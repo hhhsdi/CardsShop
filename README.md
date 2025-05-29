@@ -327,5 +327,11 @@ sequenceDiagram
 -   Инкапсуляция бизнес-правил в сервисах
 
 -   Централизованная обработка ошибок
-
 -   Логирование операций
+
+# Принцип работы программы 
+![image](https://github.com/user-attachments/assets/54f42f89-52ba-4c3b-a03c-f18c10e633d9)
+![image](https://github.com/user-attachments/assets/066b9e8f-9966-4845-8b39-456ce29e6528)
+![image](https://github.com/user-attachments/assets/23857fb1-8501-4629-ba0f-60c090f80409)
+![image](https://github.com/user-attachments/assets/f17dc38b-09a1-413d-ba64-4829703e57da)
+
