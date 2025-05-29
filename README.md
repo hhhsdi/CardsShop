@@ -286,11 +286,7 @@ sequenceDiagram
 
     -   Клиент → Заказы
 
-**Ключи**:
 
--   Первичные ключи: ManufacturerID, GPUID, VideoCardID и др.
-
--   Внешние ключи: ManufacturerID в VideoCards, GPUID в VideoCards
 
 ## Бизнес-логика
 
